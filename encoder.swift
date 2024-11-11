@@ -438,49 +438,19 @@ func encode(segments: [Segment],
            eci: Bool,
            boostError: Bool) throws -> Code {
     
-    // Prepare data bits
-    let buffer = Buffer()
-    
-    // Add ECI header if needed
-    if eci {
-        buffer.appendBits(Mode.ECI, length: 4)
-        buffer.appendBits(26, length: 8)  // UTF-8 ECI assignment value
-    }
-    
-    // Add segment data
-    for segment in segments {
-        try addSegmentData(segment: segment, version: version, buffer: buffer)
-    }
-    
-    // Get the required number of bits for this version and error level
-    let required = try getRequiredBits(version: version, error: error)
-    
-    // Add terminator and pad up to required length
-    try addTerminatorAndPad(buffer: buffer, required: required, version: version)
-    
-    // Get error correction blocks
-    let blocks = try getErrorCorrectionBlocks(version: version, error: error)
-    
-    // Convert bit buffer to bytes
-    let data = convertBitsToBytes(buffer.getBits())
-    
-    // Split data into blocks and add error correction
-    let (dataBlocks, ecBlocks) = try splitAndCorrect(data: data, blocks: blocks)
-    
-    // Interleave blocks
-    let finalData = interleaveBlocks(dataBlocks: dataBlocks, ecBlocks: ecBlocks)
-    
-    // Create the matrix
-    let matrix = try createMatrix(version: version)
+    var matrix = try createMatrix(version: version)
     
     // Add function patterns
-    try addFunctionPatterns(matrix: matrix, version: version)
+    try addFunctionPatterns(matrix: &matrix, version: version)
     
     // Add data
-    try addData(matrix: matrix, data: finalData, mask: mask)
+    try addData(matrix: &matrix, data: finalData, mask: mask)
     
     // Apply final mask pattern
-    let finalMask = try selectMask(matrix: matrix, mask: mask, version: version)
+    let finalMask = try selectMask(matrix: &matrix, mask: mask, version: version)
+    
+    // Add format information
+    addFormatInfo(matrix: &matrix, mask: finalMask, version: version)
     
     return Code(
         matrix: matrix,
@@ -982,7 +952,7 @@ func addData(matrix: inout [[UInt8]], data: [UInt8], mask: Int?) throws {
     }
 }
 
-func selectMask(matrix: [[UInt8]], mask: Int?, version: Int) throws -> Int {
+func selectMask(matrix: inout [[UInt8]], mask: Int?, version: Int) throws -> Int {
     if let mask = mask {
         // Apply specified mask
         applyMask(matrix: &matrix, pattern: mask, version: version)
