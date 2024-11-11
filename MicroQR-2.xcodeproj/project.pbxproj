@@ -14,6 +14,7 @@
 		54473AEA2CE109290023720C /* MicroQR_2.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 54473AE82CE109290023720C /* MicroQR_2.xcdatamodeld */; };
 		54473AF62CE10A590023720C /* encoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54473AF52CE10A590023720C /* encoder.swift */; };
 		54DF2DED2CE211D200CE54AE /* QRTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54DF2DEC2CE211D200CE54AE /* QRTypes.swift */; };
+		54DF2DEF2CE2170C00CE54AE /* QRPublicTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54DF2DEE2CE2170C00CE54AE /* QRPublicTypes.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +26,7 @@
 		54473AE92CE109290023720C /* MicroQR_2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = MicroQR_2.xcdatamodel; sourceTree = "<group>"; };
 		54473AF52CE10A590023720C /* encoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = encoder.swift; sourceTree = "<group>"; };
 		54DF2DEC2CE211D200CE54AE /* QRTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRTypes.swift; sourceTree = "<group>"; };
+		54DF2DEE2CE2170C00CE54AE /* QRPublicTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRPublicTypes.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -54,6 +56,7 @@
 				54473AE12CE109290023720C /* Assets.xcassets */,
 				54473ADF2CE109280023720C /* ContentView.swift */,
 				54473AF52CE10A590023720C /* encoder.swift */,
+				54DF2DEE2CE2170C00CE54AE /* QRPublicTypes.swift */,
 				54DF2DEC2CE211D200CE54AE /* QRTypes.swift */,
 				54473AE82CE109290023720C /* MicroQR_2.xcdatamodeld */,
 				54473ADD2CE109280023720C /* MicroQR_2App.swift */,
@@ -146,6 +149,7 @@
 			files = (
 				54DF2DED2CE211D200CE54AE /* QRTypes.swift in Sources */,
 				54473AEA2CE109290023720C /* MicroQR_2.xcdatamodeld in Sources */,
+				54DF2DEF2CE2170C00CE54AE /* QRPublicTypes.swift in Sources */,
 				54473AE72CE109290023720C /* Persistence.swift in Sources */,
 				54473AE02CE109280023720C /* ContentView.swift in Sources */,
 				54473AF62CE10A590023720C /* encoder.swift in Sources */,
