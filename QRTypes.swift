@@ -74,4 +74,13 @@ func convertBitsToBytes(_ bits: [UInt8]) -> [UInt8] {
 func getQRErrorCorrectionBlocks(version: Int, error: Int?) -> [ECBlock] {
     // Simplified EC block calculation
     return [ECBlock(count: 1, dataCount: 10)]
+}
+
+func prepareBytes(_ content: Any) throws -> [UInt8] {
+    if let string = content as? String {
+        return Array(string.utf8)
+    } else if let data = content as? Data {
+        return Array(data)
+    }
+    throw QREncoderError.invalidMode(message: "Content must be either String or Data")
 } 

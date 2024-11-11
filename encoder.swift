@@ -612,36 +612,36 @@ func getMatrixSize(_ version: Int) -> Int {
     return version * 4 + 17
 }
 
-func addFunctionPatterns(matrix: [[UInt8]], version: Int) throws {
+func addFunctionPatterns(matrix: inout [[UInt8]], version: Int) throws {
     // Add finder patterns for regular QR codes
     if !isMicroVersion(version) {
-        addFinderPattern(matrix: matrix, row: 0, col: 0)                    // Top-left
-        addFinderPattern(matrix: matrix, row: 0, col: matrix.count - 7)     // Top-right
-        addFinderPattern(matrix: matrix, row: matrix.count - 7, col: 0)     // Bottom-left
-        addSeparators(matrix: matrix)
+        addFinderPattern(matrix: &matrix, row: 0, col: 0)                    // Top-left
+        addFinderPattern(matrix: &matrix, row: 0, col: matrix.count - 7)     // Top-right
+        addFinderPattern(matrix: &matrix, row: matrix.count - 7, col: 0)     // Bottom-left
+        addSeparators(matrix: &matrix)
     } else {
         // Add finder pattern for Micro QR codes (only top-left)
-        addMicroFinderPattern(matrix: matrix)
+        addMicroFinderPattern(matrix: &matrix)
     }
     
     // Add alignment patterns for regular QR codes (version 2 and above)
     if version >= 2 && !isMicroVersion(version) {
-        addAlignmentPatterns(matrix: matrix, version: version)
+        addAlignmentPatterns(matrix: &matrix, version: version)
     }
     
     // Add timing patterns
-    addTimingPatterns(matrix: matrix)
+    addTimingPatterns(matrix: &matrix)
     
     // Add version information for regular QR codes (version 7 and above)
     if version >= 7 && !isMicroVersion(version) {
-        try addVersionInfo(matrix: matrix, version: version)
+        try addVersionInfo(matrix: &matrix, version: version)
     }
     
     // Reserve format information area
-    reserveFormatArea(matrix: matrix, version: version)
+    reserveFormatArea(matrix: &matrix, version: version)
 }
 
-func addFinderPattern(matrix: [[UInt8]], row: Int, col: Int) {
+func addFinderPattern(matrix: inout [[UInt8]], row: Int, col: Int) {
     // 7x7 finder pattern:
     // ■■■■■■■
     // ■□□□□□■
@@ -660,7 +660,7 @@ func addFinderPattern(matrix: [[UInt8]], row: Int, col: Int) {
     }
 }
 
-func addMicroFinderPattern(matrix: [[UInt8]]) {
+func addMicroFinderPattern(matrix: inout [[UInt8]]) {
     // Similar to regular finder pattern but smaller
     for r in 0..<7 {
         for c in 0..<7 {
@@ -671,7 +671,7 @@ func addMicroFinderPattern(matrix: [[UInt8]]) {
     }
 }
 
-func addSeparators(matrix: [[UInt8]]) {
+func addSeparators(matrix: inout [[UInt8]]) {
     let size = matrix.count
     
     // Horizontal separators
@@ -689,7 +689,7 @@ func addSeparators(matrix: [[UInt8]]) {
     }
 }
 
-func addTimingPatterns(matrix: [[UInt8]]) {
+func addTimingPatterns(matrix: inout [[UInt8]]) {
     let size = matrix.count
     
     // Horizontal timing pattern
@@ -703,20 +703,20 @@ func addTimingPatterns(matrix: [[UInt8]]) {
     }
 }
 
-func addAlignmentPatterns(matrix: [[UInt8]], version: Int) {
+func addAlignmentPatterns(matrix: inout [[UInt8]], version: Int) {
     let positions = getAlignmentPatternPositions(version)
     
     for row in positions {
         for col in positions {
             // Skip if overlapping with finder patterns
             if !isOverlappingWithFinder(row: row, col: col, size: matrix.count) {
-                addAlignmentPattern(matrix: matrix, row: row, col: col)
+                addAlignmentPattern(matrix: &matrix, row: row, col: col)
             }
         }
     }
 }
 
-func addAlignmentPattern(matrix: [[UInt8]], row: Int, col: Int) {
+func addAlignmentPattern(matrix: inout [[UInt8]], row: Int, col: Int) {
     // 5x5 alignment pattern:
     // ■■■■■
     // ■□□□■
@@ -762,7 +762,7 @@ func isOverlappingWithFinder(row: Int, col: Int, size: Int) -> Bool {
     return overlapsTopLeft || overlapsTopRight || overlapsBottomLeft
 }
 
-func reserveFormatArea(matrix: [[UInt8]], version: Int) {
+func reserveFormatArea(matrix: inout [[UInt8]], version: Int) {
     let size = matrix.count
     
     // Mark format information areas as reserved (value: 2)
@@ -925,7 +925,6 @@ func interleaveBlocks(dataBlocks: [[UInt8]], ecBlocks: [[UInt8]]) -> [UInt8] {
             if i < block.count {
                 result.append(block[i])
             }
-        }
     }
     
     // Interleave error correction blocks
@@ -949,7 +948,7 @@ struct MaskPattern {
     let score: Int
 }
 
-func addData(matrix: [[UInt8]], data: [UInt8], mask: Int?) throws {
+func addData(matrix: inout [[UInt8]], data: [UInt8], mask: Int?) throws {
     var bitIndex = 0
     let size = matrix.count
     
@@ -978,7 +977,7 @@ func addData(matrix: [[UInt8]], data: [UInt8], mask: Int?) throws {
 func selectMask(matrix: [[UInt8]], mask: Int?, version: Int) throws -> Int {
     if let mask = mask {
         // Apply specified mask
-        applyMask(matrix: matrix, pattern: mask, version: version)
+        applyMask(matrix: &matrix, pattern: mask, version: version)
         return mask
     }
     
@@ -987,7 +986,7 @@ func selectMask(matrix: [[UInt8]], mask: Int?, version: Int) throws -> Int {
     
     for pattern in 0..<(isMicroVersion(version) ? 4 : 8) {
         let testMatrix = matrix.map { $0 } // Create a copy
-        applyMask(matrix: testMatrix, pattern: pattern, version: version)
+        applyMask(matrix: &testMatrix, pattern: pattern, version: version)
         let score = calculatePenaltyScore(matrix: testMatrix)
         
         if score < bestPattern.score {
@@ -1005,7 +1004,7 @@ func selectMask(matrix: [[UInt8]], mask: Int?, version: Int) throws -> Int {
     return bestPattern.mask
 }
 
-func applyMask(matrix: [[UInt8]], pattern: Int, version: Int) {
+func applyMask(matrix: inout [[UInt8]], pattern: Int, version: Int) {
     let size = matrix.count
     
     for row in 0..<size {
@@ -1021,7 +1020,7 @@ func applyMask(matrix: [[UInt8]], pattern: Int, version: Int) {
     }
     
     // Add format information
-    addFormatInfo(matrix: matrix, mask: pattern, version: version)
+    addFormatInfo(matrix: &matrix, mask: pattern, version: version)
 }
 
 func shouldMaskCell(row: Int, col: Int, pattern: Int) -> Bool {
@@ -1183,14 +1182,14 @@ func calculateBalancePenalty(matrix: [[UInt8]]) -> Int {
 
 // MARK: - Final Assembly
 
-struct QRCode {
-    let matrix: [[Bool]]      // true = black, false = white
-    let version: Int
-    let errorLevel: Int?
-    let mask: Int
-    let microQR: Bool
+public struct QRCode {
+    public let matrix: [[Bool]]
+    public let version: Int
+    public let errorLevel: Int?
+    public let mask: Int
+    public let microQR: Bool
     
-    var size: Int {
+    public var size: Int {
         return matrix.count
     }
 }
