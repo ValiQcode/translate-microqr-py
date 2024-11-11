@@ -76,13 +76,9 @@ func getQRErrorCorrectionBlocks(version: Int, error: Int?) -> [ECBlock] {
     return [ECBlock(count: 1, dataCount: 10)]
 }
 
-func prepareBytes(_ content: Any) throws -> [Segment] {
-    if let string = content as? String {
-        return Array(string.utf8).map { Segment(bits: [$0], charCount: 1, mode: 1, encoding: nil) }
-    } else if let data = content as? Data {
-        return Array(data).map { Segment(bits: [$0], charCount: 1, mode: 1, encoding: nil) }
-    }
-    throw QREncoderError.invalidMode(message: "Content must be either String or Data")
+func prepareBytes(bytes: Data, mode: Int?) throws -> [Segment] {
+    let bits = Array(bytes)
+    return [Segment(bits: bits, charCount: bytes.count, mode: mode ?? Mode.BYTE, encoding: nil)]
 }
 
 func addData(matrix: inout [[UInt8]], data: [UInt8], mask: Int?) throws {
