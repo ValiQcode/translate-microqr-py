@@ -57,10 +57,6 @@ func getModeName(_ mode: Int) -> String {
     }
 }
 
-func isMicroVersion(_ version: Int) -> Bool {
-    return version < 1
-}
-
 func getVersionName(_ version: Int) -> String {
     switch version {
     case Version.M1:
