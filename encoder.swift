@@ -156,16 +156,20 @@ public func encode(
     let normalizedVersion = try normalizeVersion(version)
     
     // Validate micro QR code parameters
-    if !micro && micro != nil && isMicroVersion(normalizedVersion) {
-        throw QREncoderError.invalidVersion(
-            message: "A Micro QR Code version '\(getVersionName(normalizedVersion))' is provided but parameter 'micro' is false"
-        )
-    }
-    
-    if micro && version != nil && !isMicroVersion(normalizedVersion) {
-        throw QREncoderError.invalidVersion(
-            message: "Illegal Micro QR Code version '\(getVersionName(normalizedVersion))'"
-        )
+    if let isMicro = micro {
+        if isMicro {
+            if normalizedVersion < 1 {
+                throw QREncoderError.invalidVersion(
+                    message: "A Micro QR Code version '\(getVersionName(normalizedVersion))' is provided but parameter 'micro' is false"
+                )
+            }
+        } else {
+            if normalizedVersion >= 1 {
+                throw QREncoderError.invalidVersion(
+                    message: "Illegal Micro QR Code version '\(getVersionName(normalizedVersion))'"
+                )
+            }
+        }
     }
     
     let normalizedError = try normalizeErrorLevel(error, acceptNone: true)
@@ -181,10 +185,14 @@ public func encode(
     }
     
     // Validate error correction level
-    if error == ErrorLevel.H && (micro ?? false || isMicroVersion(normalizedVersion)) {
-        throw QREncoderError.invalidErrorLevel(
-            message: "Error correction level 'H' is not available for Micro QR Codes"
-        )
+    if let errorLevel = error {
+        if errorLevel == ErrorLevel.H && (micro ?? false || isMicroVersion(normalizedVersion)) {
+            throw QREncoderError.invalidErrorLevel(
+                message: "Error correction level 'H' is not available for Micro QR Codes"
+            )
+        }
+    } else {
+        throw QREncoderError.invalidErrorLevel(message: "Error level must be provided")
     }
     
     // Validate ECI mode
@@ -1030,8 +1038,8 @@ func shouldMaskCell(row: Int, col: Int, pattern: Int) -> Bool {
     case 2: return col % 3 == 0
     case 3: return (row + col) % 3 == 0
     case 4: return (row / 2 + col / 3) % 2 == 0
-    case 5: return ((row * col) % 2) + ((row * col) % 3 == 0
-    case 6: return (((row * col) % 2) + ((row * col) % 3)) % 2 == 0
+    case 5: return (((row * col) % 2) + ((row * col) % 3)) != 0
+    case 6: return (((row + col) % 2) + ((row * col) % 3)) % 2 == 0
     case 7: return (((row + col) % 2) + ((row * col) % 3)) % 2 == 0
     default: return false
     }
