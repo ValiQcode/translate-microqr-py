@@ -185,14 +185,10 @@ public func encode(
     }
     
     // Validate error correction level
-    if let errorLevel = error {
-        if errorLevel == ErrorLevel.H && (micro ?? false || isMicroVersion(normalizedVersion)) {
-            throw QREncoderError.invalidErrorLevel(
-                message: "Error correction level 'H' is not available for Micro QR Codes"
-            )
-        }
-    } else {
-        throw QREncoderError.invalidErrorLevel(message: "Error level must be provided")
+    if let errorLevel = error, errorLevel == ErrorLevel.H && (micro ?? false || isMicroVersion(normalizedVersion)) {
+        throw QREncoderError.invalidErrorLevel(
+            message: "Error correction level 'H' is not available for Micro QR Codes"
+        )
     }
     
     // Validate ECI mode
@@ -439,6 +435,13 @@ func encode(segments: [Segment],
            boostError: Bool) throws -> Code {
     
     var matrix = try createMatrix(version: version)
+    
+    // Create final data from segments
+    let buffer = Buffer()
+    for segment in segments {
+        try addSegmentData(segment: segment, version: version, buffer: buffer)
+    }
+    let finalData = buffer.getBits()
     
     // Add function patterns
     try addFunctionPatterns(matrix: &matrix, version: version)
