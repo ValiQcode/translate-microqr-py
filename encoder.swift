@@ -957,28 +957,21 @@ func addData(matrix: inout [[UInt8]], data: [UInt8], mask: Int?) throws {
 
 func selectMask(matrix: inout [[UInt8]], mask: Int?, version: Int) throws -> Int {
     if let mask = mask {
-        // Apply specified mask
         applyMask(matrix: &matrix, pattern: mask, version: version)
         return mask
     }
     
-    // Try all masks and select the best one
-    var bestPattern = MaskPattern(mask: 0, matrix: matrix, score: Int.max)
+    var bestPattern = (mask: 0, score: Int.max)
+    let patterns = isMicroVersion(version) ? 4 : 8
     
-    for pattern in 0..<(isMicroVersion(version) ? 4 : 8) {
-        let testMatrix = matrix.map { $0 } // Create a copy
+    for pattern in 0..<patterns {
+        var testMatrix = matrix // Create mutable copy
         applyMask(matrix: &testMatrix, pattern: pattern, version: version)
-        let score = calculatePenaltyScore(matrix: testMatrix)
+        let score = calculatePenaltyScore(testMatrix)
         
         if score < bestPattern.score {
-            bestPattern = MaskPattern(mask: pattern, matrix: testMatrix, score: score)
-        }
-    }
-    
-    // Apply the best mask to the original matrix
-    matrix.indices.forEach { row in
-        matrix[row].indices.forEach { col in
-            matrix[row][col] = bestPattern.matrix[row][col]
+            bestPattern = (pattern, score)
+            matrix = testMatrix // Update original matrix with best result
         }
     }
     
