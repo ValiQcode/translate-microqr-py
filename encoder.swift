@@ -412,15 +412,6 @@ func encodeKanji(_ text: String) throws -> ([UInt8], Int) {
     return (buffer.getBits(), bytes.count / 2)
 }
 
-// Helper extension for Buffer if not already defined
-extension Buffer {
-    func appendBits(_ value: Int, length: Int) {
-        for i in stride(from: length - 1, through: 0, by: -1) {
-            data.append(UInt8((value >> i) & 1))
-        }
-    }
-}
-
 // MARK: - Core Encoding Implementation
 
 func encode(segments: [Segment], 
